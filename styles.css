@@ -58,6 +58,8 @@ button {
     cursor: pointer;
     transition: all 0.3s ease;
     touch-action: manipulation;
+    min-width: 60px;
+    aspect-ratio: 1;
 }
 
 button:hover {
@@ -83,6 +85,13 @@ button:active {
     background: #4B0082;
 }
 
+button:nth-child(17) {
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 @media (max-width: 480px) {
     .calculator {
         width: 95%;
@@ -92,5 +101,9 @@ button:active {
     button {
         padding: 15px;
         font-size: 1.2rem;
+    }
+    
+    button:nth-child(17) {
+        font-size: 1rem;
     }
 }
