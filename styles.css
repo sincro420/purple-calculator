@@ -1,0 +1,96 @@
+:root {
+    --primary: #8A2BE2;
+    --dark: #1a1a1a;
+    --light: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: var(--dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    touch-action: manipulation;
+}
+
+.calculator {
+    background: var(--dark);
+    width: 100%;
+    max-width: 375px;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+}
+
+.display {
+    background: #2a2a2a;
+    color: var(--primary);
+    font-size: 2.5rem;
+    padding: 20px;
+    text-align: right;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    min-height: 80px;
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+button {
+    background: var(--dark);
+    color: var(--light);
+    border: 2px solid var(--primary);
+    padding: 20px;
+    font-size: 1.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+}
+
+button:hover {
+    background: var(--primary);
+    color: var(--dark);
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+.operator {
+    background: var(--primary);
+    color: var(--dark);
+}
+
+.operator:hover {
+    background: var(--dark);
+    color: var(--primary);
+}
+
+.equals {
+    background: #4B0082;
+}
+
+@media (max-width: 480px) {
+    .calculator {
+        width: 95%;
+        padding: 10px;
+    }
+    
+    button {
+        padding: 15px;
+        font-size: 1.2rem;
+    }
+}
