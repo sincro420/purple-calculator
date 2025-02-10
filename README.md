@@ -2,7 +2,7 @@
 
 A sleek, modern calculator web application with a beautiful purple theme. This calculator provides standard arithmetic operations with a user-friendly interface.
 
-![Purple Calculator Screenshot](images/screenshot.png)
+![Purple Calculator Screenshot](images/ss.png)
 
 ## Features
 
