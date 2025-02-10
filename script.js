@@ -133,7 +133,7 @@ class Calculator {
     }
 
     handlePercentage() {
-        if (this.currentInput === '0') return;
+        if (this.currentInput === '0' || this.waitingForSecondOperand) return;
         
         const currentValue = parseFloat(this.currentInput);
         let result;
@@ -151,8 +151,10 @@ class Calculator {
         
         if (this.operator) {
             // If we're in the middle of an operation, show the full expression
-            const parts = this.displayString.split(this.operator);
-            this.displayString = this.firstOperand + this.operator + result;
+            const displayOperator = this.operator === '*' ? '×' : 
+                                  this.operator === '/' ? '÷' : 
+                                  this.operator;
+            this.displayString = this.firstOperand + displayOperator + result;
         }
         
         this.updateDisplay();
