@@ -238,6 +238,6 @@ button[data-value="backspace"].disabled.animating {
     }
 
     button[data-value="backspace"] {
-        font-size: 1.5rem;  /* Larger font size for backspace on mobile */
+        font-size: 2.5rem;  /* Larger font size for backspace on mobile */
     }
 }
