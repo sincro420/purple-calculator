@@ -4,7 +4,6 @@
     --light: #ffffff;
 }
 
-/* Base styles and resets */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -26,7 +25,6 @@ body {
     touch-action: manipulation;
 }
 
-/* Calculator container */
 .calculator {
     background: var(--dark);
     width: 100%;
@@ -41,7 +39,6 @@ body {
     width: 400px;
 }
 
-/* Display */
 .display {
     background: #2a2a2a;
     color: var(--primary);
@@ -60,7 +57,6 @@ body {
     animation: resultCombined 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-/* Button grid */
 .buttons {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -72,7 +68,6 @@ body {
     grid-template-columns: repeat(5, 1fr);
 }
 
-/* Button styles */
 button, .scientific[data-value="e"] {
     background: var(--dark);
     color: var(--light);
@@ -84,7 +79,16 @@ button, .scientific[data-value="e"] {
     transition: all 0.3s ease;
     touch-action: manipulation;
     min-width: 60px;
+    min-height: 60px;
     aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+button.expand {
+    font-size: 1.2rem;
+    padding: 0;
 }
 
 button:active {
@@ -108,7 +112,6 @@ button:active {
     display: none;
 }
 
-/* Hover effects only for devices that support it */
 @media (hover: hover) {
     button:hover, .scientific[data-value="e"]:hover {
         background: var(--primary);
@@ -121,7 +124,6 @@ button:active {
     }
 }
 
-/* Backspace button states */
 button[data-value="backspace"].disabled {
     opacity: 0.44;
     border-color: #666;
@@ -137,7 +139,6 @@ button[data-value="backspace"].disabled.animating {
     border-color: #666 !important;
 }
 
-/* Popup styles */
 .popup {
     position: fixed;
     top: 20px;
@@ -156,7 +157,6 @@ button[data-value="backspace"].disabled.animating {
     animation: fadeOut 0.5s ease-out forwards;
 }
 
-/* Animations */
 @keyframes disabledShake {
     0% { transform: rotate(0deg) scale(1); }
     25% { transform: rotate(-5deg) scale(0.96); }
@@ -193,7 +193,6 @@ button[data-value="backspace"].disabled.animating {
     to { opacity: 0; }
 }
 
-/* Media queries */
 @media (max-width: 480px) {
     .calculator {
         width: 95%;
