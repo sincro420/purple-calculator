@@ -269,3 +269,20 @@ button {
     outline: none !important;
     touch-action: manipulation;
 }
+
+/* Additional specific overrides */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    outline: none !important;
+}
+
+button::-moz-focus-inner {
+    border: 0;
+}
+
+button::focus-visible {
+    outline: none !important;
+}
