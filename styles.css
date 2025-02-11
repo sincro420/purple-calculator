@@ -229,12 +229,25 @@ button[data-value="backspace"].disabled.animating {
         padding: 10px;
     }
     
+    .buttons {
+        aspect-ratio: 4/5;  /* Force aspect ratio on mobile */
+    }
+
+    .buttons.expanded {
+        aspect-ratio: 5/6;  /* Force expanded aspect ratio on mobile */
+    }
+    
     .buttons button {
-        padding: 15px;
+        padding: 0;  /* Remove padding to maintain grid */
+        aspect-ratio: 1;  /* Force square buttons */
         font-size: 1.2rem;
     }
 
     .buttons button.expand {
         font-size: 0.7rem !important;
+    }
+
+    .buttons button[data-value="backspace"] {
+        font-size: 2rem !important;
     }
 }
