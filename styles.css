@@ -234,10 +234,20 @@ button[data-value="backspace"].disabled.animating {
     }
 
     button.expand {
-        font-size: 0.7rem;  /* Smaller font size for expand button on mobile */
+        font-size: 0.7rem !important;  /* Force smaller font size for expand button */
     }
 
     button[data-value="backspace"] {
-        font-size: 2.5rem;  /* Larger font size for backspace on mobile */
+        font-size: 2.5rem !important;  /* Force larger font size for backspace */
     }
+}
+
+/* Ensure these styles come after the general button styles */
+button.expand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    font-size: 1.2rem;
+    padding: 0;
 }
