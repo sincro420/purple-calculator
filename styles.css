@@ -232,7 +232,7 @@ button[data-value="backspace"].disabled.animating {
     .buttons {
         aspect-ratio: 4/5;
         display: grid;
-        grid-auto-rows: 1fr;  /* Force all rows to be equal */
+        grid-auto-rows: 1fr;
     }
 
     .buttons.expanded {
@@ -246,8 +246,8 @@ button[data-value="backspace"].disabled.animating {
         height: 100%;
         aspect-ratio: 1;
         font-size: 1.2rem;
-        min-height: 0;  /* Remove min-height constraints */
-        min-width: 0;   /* Remove min-width constraints */
+        min-height: 0;
+        min-width: 0;
     }
 
     .buttons button.expand {
@@ -256,5 +256,6 @@ button[data-value="backspace"].disabled.animating {
 
     .buttons button[data-value="backspace"] {
         font-size: 2rem !important;
+        padding-bottom: 4px;
     }
 }
