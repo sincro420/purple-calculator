@@ -213,6 +213,18 @@ document.querySelector('.expand').addEventListener('click', function() {
         buttonsGrid.classList.add('expanded');
         scientificButtons.forEach(button => button.classList.remove('hidden'));
         this.setAttribute('data-expanded', 'true');
+        
+        // Add popup notification
+        const popup = document.createElement('div');
+        popup.className = 'popup';
+        popup.textContent = 'Expanded mode is not functional yet';
+        document.body.appendChild(popup);
+        
+        // Remove popup after 3 seconds
+        setTimeout(() => {
+            popup.classList.add('fade-out');
+            setTimeout(() => popup.remove(), 500);
+        }, 3000);
     } else {
         calculator.classList.remove('expanded');
         buttonsGrid.classList.remove('expanded');
