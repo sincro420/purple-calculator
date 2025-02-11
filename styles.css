@@ -236,8 +236,4 @@ button[data-value="backspace"].disabled.animating {
     .buttons button.expand {
         font-size: 0.7rem !important;
     }
-
-    .buttons button[data-value="backspace"] {
-        font-size: 2rem !important;
-    }
 }
