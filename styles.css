@@ -79,19 +79,13 @@ body {
     height: 100%;
     min-width: 60px;
     min-height: 60px;
+    aspect-ratio: 1;
 }
 
 /* Expand Button Styles */
 button.expand {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    line-height: 1;
     font-size: 1.2rem;
     padding: 0;
-    min-width: 60px;
-    min-height: 60px;
-    aspect-ratio: 1;
 }
 
 /* Base Button Styles */
@@ -105,7 +99,6 @@ button, .scientific[data-value="e"] {
     cursor: pointer;
     transition: all 0.3s ease;
     touch-action: manipulation;
-    aspect-ratio: 1;
     display: flex;
     justify-content: center;
     align-items: center;
