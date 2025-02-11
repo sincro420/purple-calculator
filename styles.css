@@ -87,6 +87,10 @@ body {
 
 /* Expand Button Styles */
 button.expand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
     font-size: 1.2rem;
     padding: 0;
 }
@@ -227,5 +231,13 @@ button[data-value="backspace"].disabled.animating {
     button {
         padding: 15px;
         font-size: 1.2rem;
+    }
+
+    button.expand {
+        font-size: 1rem;  /* Smaller font size for expand button on mobile */
+    }
+
+    button[data-value="backspace"] {
+        font-size: 1.4rem;  /* Larger font size for backspace on mobile */
     }
 }
