@@ -36,7 +36,7 @@ body {
     padding: 20px;
     border-radius: 20px;
     box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
-    transition: width 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -99,7 +99,7 @@ button, .scientific[data-value="e"] {
     font-size: 1.5rem;
     border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
     touch-action: manipulation;
     display: flex;
     justify-content: center;
