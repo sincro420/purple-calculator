@@ -69,6 +69,11 @@ button, .scientific[data-value="e"] {
     touch-action: manipulation;
     min-width: 60px;
     aspect-ratio: 1;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 @media (hover: hover) {
@@ -245,4 +250,10 @@ button[data-value="backspace"].disabled.animating {
     to {
         opacity: 0;
     }
+}
+
+/* Remove focus styles */
+button:focus, 
+.scientific[data-value="e"]:focus {
+    outline: none;
 }
