@@ -7,6 +7,7 @@ class Calculator {
         this.firstOperand = null;
         this.operator = null;
         this.waitingForSecondOperand = false;
+        this.equalsJustPressed = false;
         this.initialize();
     }
 
@@ -18,8 +19,17 @@ class Calculator {
 
     handleInput(value) {
         if (value >= '0' && value <= '9' || value === '.') {
+            if (this.equalsJustPressed) {
+                this.handleClear();
+                this.equalsJustPressed = false;
+                document.querySelector('button[data-value="backspace"]').classList.remove('disabled');
+                this.display.classList.remove('result');
+            }
             this.handleNumber(value);
         } else if (['+', '-', '*', '/', '%'].includes(value)) {
+            this.equalsJustPressed = false;
+            document.querySelector('button[data-value="backspace"]').classList.remove('disabled');
+            this.display.classList.remove('result');
             if (value === '%') {
                 this.handlePercentage();
             } else {
@@ -28,9 +38,14 @@ class Calculator {
         } else if (value === '=') {
             this.handleEquals();
         } else if (value === 'clear') {
+            this.equalsJustPressed = false;
+            document.querySelector('button[data-value="backspace"]').classList.remove('disabled');
+            this.display.classList.remove('result');
             this.handleClear();
         } else if (value === 'backspace') {
-            this.handleBackspace();
+            if (!this.equalsJustPressed) {
+                this.handleBackspace();
+            }
         }
     }
 
@@ -69,23 +84,12 @@ class Calculator {
             // Don't update currentInput or displayString here
         }
         
-        // If we're waiting for second operand (i.e., last input was an operator)
-        // just replace the last operator in the display
-        if (this.waitingForSecondOperand) {
-            this.displayString = this.displayString.slice(0, -1);
-        }
-        
-        this.operator = operator;
         const displayOperator = operator === '*' ? '×' : 
                               operator === '/' ? '÷' : 
                               operator;
         
-        if (!this.waitingForSecondOperand) {
-            this.displayString += displayOperator;
-        } else {
-            this.displayString += displayOperator;
-        }
-        
+        this.operator = operator;
+        this.displayString += displayOperator;
         this.waitingForSecondOperand = true;
         this.updateDisplay();
     }
@@ -98,6 +102,13 @@ class Calculator {
             this.operator = null;
             this.firstOperand = null;
             this.waitingForSecondOperand = true;
+            this.equalsJustPressed = true;
+            
+            const backspaceButton = document.querySelector('button[data-value="backspace"]');
+            backspaceButton.classList.add('disabled');
+            
+            this.display.classList.add('result');
+            
             this.updateDisplay();
         }
     }
@@ -189,4 +200,32 @@ class Calculator {
 
 document.addEventListener('DOMContentLoaded', () => {
     new Calculator();
+});
+
+document.querySelector('.expand').addEventListener('click', function() {
+    const calculator = document.querySelector('.calculator');
+    const buttonsGrid = document.querySelector('.buttons');
+    const scientificButtons = document.querySelectorAll('.scientific');
+    const isExpanded = this.getAttribute('data-expanded') === 'true';
+    
+    if (!isExpanded) {
+        calculator.classList.add('expanded');
+        buttonsGrid.classList.add('expanded');
+        scientificButtons.forEach(button => button.classList.remove('hidden'));
+        this.setAttribute('data-expanded', 'true');
+    } else {
+        calculator.classList.remove('expanded');
+        buttonsGrid.classList.remove('expanded');
+        scientificButtons.forEach(button => button.classList.add('hidden'));
+        this.setAttribute('data-expanded', 'false');
+    }
+});
+
+document.querySelector('button[data-value="backspace"]').addEventListener('mousedown', function() {
+    if (this.classList.contains('disabled')) {
+        this.classList.add('animating');
+        setTimeout(() => {
+            this.classList.remove('animating');
+        }, 500);
+    }
 });

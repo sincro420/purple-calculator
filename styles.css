@@ -27,6 +27,7 @@ body {
     padding: 20px;
     border-radius: 20px;
     box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+    transition: width 0.3s ease-in-out;
 }
 
 .display {
@@ -45,10 +46,15 @@ body {
 .buttons {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    gap: 5px;
+    transition: all 0.3s ease-in-out;
 }
 
-button {
+.buttons.expanded {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+button, .scientific[data-value="e"] {
     background: var(--dark);
     color: var(--light);
     border: 2px solid var(--primary);
@@ -62,13 +68,13 @@ button {
     aspect-ratio: 1;
 }
 
-button:hover {
+button:hover, .scientific[data-value="e"]:hover {
     background: var(--primary);
     color: var(--dark);
 }
 
 button:active {
-    transform: scale(0.95);
+    transform: scale(0.9);
 }
 
 .operator {
@@ -92,6 +98,33 @@ button:nth-child(17) {
     align-items: center;
 }
 
+.scientific.hidden {
+    display: none;
+}
+
+.scientific {
+    background-color: #9370DB;
+}
+
+.calculator.expanded {
+    width: 400px;
+}
+
+.buttons.expanded button {
+    font-size: 0.9em;
+    padding: 10px;
+}
+
+.expand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.calculator.expanded .expand {
+    background-color: #9370DB;
+}
+
 @media (max-width: 480px) {
     .calculator {
         width: 95%;
@@ -106,4 +139,66 @@ button:nth-child(17) {
     button:nth-child(17) {
         font-size: 1rem;
     }
+}
+
+button[data-value="backspace"].disabled {
+    opacity: 0.44;
+    border-color: #666;
+    color: #ebe5e5;
+    cursor: not-allowed;
+}
+
+button[data-value="backspace"].disabled:hover {
+    background: var(--dark);
+    color: #666;
+    border-color: #666;
+}
+
+@keyframes disabledShake {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    25% {
+        transform: rotate(-5deg) scale(0.96);
+    }
+    50% {
+        transform: rotate(0deg) scale(0.96);
+    }
+    75% {
+        transform: rotate(-5deg) scale(0.96);
+    }
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+button[data-value="backspace"].disabled:active,
+button[data-value="backspace"].disabled.animating {
+    animation: disabledShake 0.5s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+    background: var(--dark) !important;
+    color: #666 !important;
+    border-color: #666 !important;
+}
+
+@keyframes resultCombined {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+        text-shadow: 0 0 0 rgba(224, 176, 255, 0);
+    }
+    40% {
+        opacity: 1;
+        transform: translateY(0) scale(1.02);
+        text-shadow: 0 0 15px rgba(224, 176, 255, 0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        text-shadow: 0 0 0 rgba(224, 176, 255, 0);
+    }
+}
+
+.display.result {
+    color: #E0B0FF;
+    animation: resultCombined 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
