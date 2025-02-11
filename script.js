@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add popup notification
             const popup = document.createElement('div');
             popup.className = 'popup';
-            popup.textContent = 'Scientific buttons are not functional yet';
+            popup.textContent = 'Expanded mode is not functional yet';
             document.body.appendChild(popup);
             
             // Remove popup after 3 seconds
