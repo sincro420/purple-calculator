@@ -68,11 +68,26 @@ button, .scientific[data-value="e"] {
     aspect-ratio: 1;
 }
 
-button:hover, .scientific[data-value="e"]:hover {
-    background: var(--primary);
-    color: var(--dark);
+@media (hover: hover) {
+    /* Only apply hover effects on devices that support hover */
+    button:hover, .scientific[data-button="e"]:hover {
+        background: var(--primary);
+        color: var(--dark);
+    }
+
+    .operator:hover {
+        background: var(--dark);
+        color: var(--primary);
+    }
+
+    button[data-value="backspace"].disabled:hover {
+        background: var(--dark);
+        color: #666;
+        border-color: #666;
+    }
 }
 
+/* Move the active state outside the hover media query */
 button:active {
     transform: scale(0.9);
 }
@@ -80,11 +95,6 @@ button:active {
 .operator {
     background: var(--primary);
     color: var(--dark);
-}
-
-.operator:hover {
-    background: var(--dark);
-    color: var(--primary);
 }
 
 .equals {
@@ -148,10 +158,12 @@ button[data-value="backspace"].disabled {
     cursor: not-allowed;
 }
 
-button[data-value="backspace"].disabled:hover {
-    background: var(--dark);
-    color: #666;
-    border-color: #666;
+button[data-value="backspace"].disabled:active,
+button[data-value="backspace"].disabled.animating {
+    animation: disabledShake 0.5s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+    background: var(--dark) !important;
+    color: #666 !important;
+    border-color: #666 !important;
 }
 
 @keyframes disabledShake {
@@ -170,14 +182,6 @@ button[data-value="backspace"].disabled:hover {
     100% {
         transform: rotate(0deg) scale(1);
     }
-}
-
-button[data-value="backspace"].disabled:active,
-button[data-value="backspace"].disabled.animating {
-    animation: disabledShake 0.5s cubic-bezier(0.4, 0, 0.6, 1) forwards;
-    background: var(--dark) !important;
-    color: #666 !important;
-    border-color: #666 !important;
 }
 
 @keyframes resultCombined {
