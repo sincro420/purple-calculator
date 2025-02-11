@@ -21,6 +21,10 @@ body {
     align-items: center;
     min-height: 100vh;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .calculator {
@@ -256,4 +260,12 @@ button[data-value="backspace"].disabled.animating {
 button:focus, 
 .scientific[data-value="e"]:focus {
     outline: none;
+}
+
+/* Ensure buttons don't show highlight on touch */
+button {
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+    -webkit-tap-highlight-color: transparent !important;
+    outline: none !important;
+    touch-action: manipulation;
 }
