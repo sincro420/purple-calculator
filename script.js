@@ -200,44 +200,43 @@ class Calculator {
 
 document.addEventListener('DOMContentLoaded', () => {
     new Calculator();
-});
-
-document.querySelector('.expand').addEventListener('click', function() {
-    const calculator = document.querySelector('.calculator');
-    const buttonsGrid = document.querySelector('.buttons');
-    const scientificButtons = document.querySelectorAll('.scientific');
-    const isExpanded = this.getAttribute('data-expanded') === 'true';
-    
-    if (!isExpanded) {
-        calculator.classList.add('expanded');
-        buttonsGrid.classList.add('expanded');
-        scientificButtons.forEach(button => button.classList.remove('hidden'));
-        this.setAttribute('data-expanded', 'true');
+    document.querySelector('.expand').addEventListener('click', function() {
+        const calculator = document.querySelector('.calculator');
+        const buttonsGrid = document.querySelector('.buttons');
+        const scientificButtons = document.querySelectorAll('.scientific');
+        const isExpanded = this.getAttribute('data-expanded') === 'true';
         
-        // Add popup notification
-        const popup = document.createElement('div');
-        popup.className = 'popup';
-        popup.textContent = 'Expanded mode is not functional yet';
-        document.body.appendChild(popup);
-        
-        // Remove popup after 3 seconds
-        setTimeout(() => {
-            popup.classList.add('fade-out');
-            setTimeout(() => popup.remove(), 500);
-        }, 3000);
-    } else {
-        calculator.classList.remove('expanded');
-        buttonsGrid.classList.remove('expanded');
-        scientificButtons.forEach(button => button.classList.add('hidden'));
-        this.setAttribute('data-expanded', 'false');
-    }
-});
+        if (!isExpanded) {
+            calculator.classList.add('expanded');
+            buttonsGrid.classList.add('expanded');
+            scientificButtons.forEach(button => button.classList.remove('hidden'));
+            this.setAttribute('data-expanded', 'true');
+            
+            // Add popup notification
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.textContent = 'Scientific buttons are not functional yet';
+            document.body.appendChild(popup);
+            
+            // Remove popup after 3 seconds
+            setTimeout(() => {
+                popup.classList.add('fade-out');
+                setTimeout(() => popup.remove(), 500);
+            }, 3000);
+        } else {
+            calculator.classList.remove('expanded');
+            buttonsGrid.classList.remove('expanded');
+            scientificButtons.forEach(button => button.classList.add('hidden'));
+            this.setAttribute('data-expanded', 'false');
+        }
+    });
 
-document.querySelector('button[data-value="backspace"]').addEventListener('mousedown', function() {
-    if (this.classList.contains('disabled')) {
-        this.classList.add('animating');
-        setTimeout(() => {
-            this.classList.remove('animating');
-        }, 500);
-    }
+    document.querySelector('button[data-value="backspace"]').addEventListener('mousedown', function() {
+        if (this.classList.contains('disabled')) {
+            this.classList.add('animating');
+            setTimeout(() => {
+                this.classList.remove('animating');
+            }, 500);
+        }
+    });
 });
