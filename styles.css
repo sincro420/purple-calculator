@@ -9,6 +9,9 @@
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent; 
+    -webkit-touch-callout: none; /* Prevents callout menu on long press */
+    user-select: none; /* Prevents text selection */
 }
 
 body {
@@ -87,7 +90,6 @@ button, .scientific[data-value="e"] {
     }
 }
 
-/* Move the active state outside the hover media query */
 button:active {
     transform: scale(0.9);
 }
