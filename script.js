@@ -13,7 +13,29 @@ class Calculator {
 
     initialize() {
         this.buttons.forEach(button => {
-            button.addEventListener('click', () => this.handleInput(button.dataset.value));
+            button.addEventListener('click', () => {
+                const value = button.dataset.value;
+
+                if (value === '1/x') {
+                    if (this.displayString !== '0') {
+                        this.displayString = (1 / parseFloat(this.displayString)).toString();
+                    } else {
+                        this.displayString = 'Error'; // Or handle division by zero as needed
+                    }
+                    this.equalsJustPressed = true;
+                    document.querySelector('button[data-value="backspace"]').classList.add('disabled');
+                    this.display.classList.add('result');
+                    this.display.textContent = this.displayString;
+                    this.updateDisplay();
+                } else if (value === 'clear') {
+                    this.equalsJustPressed = false;
+                    document.querySelector('button[data-value="backspace"]').classList.remove('disabled');
+                    this.display.classList.remove('result');
+                    this.handleClear();
+                } else {
+                    this.handleInput(value);
+                }
+            });
         });
     }
 
