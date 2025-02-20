@@ -136,8 +136,16 @@ class Calculator {
                               operator === '/' ? '÷' : 
                               operator;
         
+        // Replace operator if last character is already an operator
+        const lastChar = this.displayString.slice(-1);
+        const operators = ['×', '÷', '+', '-', '%'];
+        if (operators.includes(lastChar)) {
+            this.displayString = this.displayString.slice(0, -1) + displayOperator;
+        } else {
+            this.displayString += displayOperator;
+        }
+        
         this.operator = operator;
-        this.displayString += displayOperator;
         this.waitingForSecondOperand = true;
         this.updateDisplay();
 
