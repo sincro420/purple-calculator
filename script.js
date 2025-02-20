@@ -14,19 +14,41 @@ class Calculator {
     initialize() {
         this.buttons.forEach(button => {
             button.addEventListener('click', () => {
+                if (button.classList.contains('disabled')) return;
+                
                 const value = button.dataset.value;
 
                 if (value === '1/x') {
                     if (this.displayString !== '0') {
-                        this.displayString = (1 / parseFloat(this.displayString)).toString();
+                        let displayValue = this.displayString;
+                        if (this.operator && this.firstOperand !== null && this.waitingForSecondOperand === false) {
+                            // Equation present, inverse only the last number (currentInput)
+                            const currentValue = parseFloat(this.currentInput);
+                            if (currentValue !== 0) {
+                                const inverseValue = (1 / currentValue).toString();
+                                const startIdx = this.displayString.length - this.currentInput.length;
+                                displayValue = this.displayString.substring(0, startIdx) + inverseValue;
+                                this.currentInput = inverseValue;
+                                this.displayString = displayValue;
+                            } else {
+                                this.displayString = 'Error';
+                                this.currentInput = 'Error';
+                            }
+                        } else {
+                            // No equation, inverse the whole display
+                            displayValue = (1 / parseFloat(displayValue)).toString();
+                            this.currentInput = displayValue;
+                            this.displayString = displayValue;
+                            this.equalsJustPressed = true;
+                            document.querySelector('button[data-value="backspace"]').classList.add('disabled');
+                            this.display.classList.add('result');
+                        }
+                        this.display.textContent = this.displayString;
+                        this.updateDisplay();
                     } else {
                         this.displayString = 'Error'; // Or handle division by zero as needed
+                        this.display.textContent = this.displayString;
                     }
-                    this.equalsJustPressed = true;
-                    document.querySelector('button[data-value="backspace"]').classList.add('disabled');
-                    this.display.classList.add('result');
-                    this.display.textContent = this.displayString;
-                    this.updateDisplay();
                 } else if (value === 'clear') {
                     this.equalsJustPressed = false;
                     document.querySelector('button[data-value="backspace"]').classList.remove('disabled');
@@ -92,6 +114,10 @@ class Calculator {
             }
         }
         this.updateDisplay();
+
+        // Enable 1/x button when number is pressed
+        const inverseButton = document.querySelector('button[data-value="1/x"]');
+        inverseButton.classList.remove('disabled');
     }
 
     handleOperator(operator) {
@@ -114,6 +140,10 @@ class Calculator {
         this.displayString += displayOperator;
         this.waitingForSecondOperand = true;
         this.updateDisplay();
+
+        // Disable 1/x button when operator is pressed
+        const inverseButton = document.querySelector('button[data-value="1/x"]');
+        inverseButton.classList.add('disabled');
     }
 
     handleEquals() {
@@ -163,6 +193,15 @@ class Calculator {
             this.displayString = this.displayString.length > 1 ? this.displayString.slice(0, -1) : '0';
         }
         this.updateDisplay();
+
+        // New check for operator at the end after backspace
+        const lastChar = this.displayString.slice(-1);
+        const operatorMap = {'×': '*', '÷': '/', '+': '+', '-': '-', '%': '%'};
+        if (Object.keys(operatorMap).includes(lastChar)) {
+            this.operator = operatorMap[lastChar];
+            this.waitingForSecondOperand = true;
+            this.currentInput = this.firstOperand.toString();
+        }
     }
 
     handlePercentage() {
