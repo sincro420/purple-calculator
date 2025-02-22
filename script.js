@@ -8,6 +8,7 @@ class Calculator {
         this.operator = null;
         this.waitingForSecondOperand = false;
         this.equalsJustPressed = false;
+        this.parenthesesCount = 0;  // Add this line
         this.initialize();
     }
 
@@ -25,7 +26,13 @@ class Calculator {
                             // Equation present, inverse only the last number (currentInput)
                             const currentValue = parseFloat(this.currentInput);
                             if (currentValue !== 0) {
-                                const inverseValue = (1 / currentValue).toString();
+                                let inverseValue = 1 / currentValue;
+                                // Use scientific notation if the number is very small
+                                if (Math.abs(inverseValue) < 0.000001) {
+                                    inverseValue = inverseValue.toExponential(8);
+                                } else {
+                                    inverseValue = inverseValue.toFixed(8).replace(/\.?0+$/, '');
+                                }
                                 const startIdx = this.displayString.length - this.currentInput.length;
                                 displayValue = this.displayString.substring(0, startIdx) + inverseValue;
                                 this.currentInput = inverseValue;
@@ -36,7 +43,12 @@ class Calculator {
                             }
                         } else {
                             // No equation, inverse the whole display
-                            displayValue = (1 / parseFloat(displayValue)).toString();
+                            let inverseValue = 1 / parseFloat(displayValue);
+                            if (Math.abs(inverseValue) < 0.000001) {
+                                displayValue = inverseValue.toExponential(8);
+                            } else {
+                                displayValue = inverseValue.toFixed(8).replace(/\.?0+$/, '');
+                            }
                             this.currentInput = displayValue;
                             this.displayString = displayValue;
                             this.equalsJustPressed = true;
@@ -46,7 +58,7 @@ class Calculator {
                         this.display.textContent = this.displayString;
                         this.updateDisplay();
                     } else {
-                        this.displayString = 'Error'; // Or handle division by zero as needed
+                        this.displayString = 'Error';
                         this.display.textContent = this.displayString;
                     }
                 } else if (value === 'clear') {
@@ -62,7 +74,9 @@ class Calculator {
     }
 
     handleInput(value) {
-        if (value >= '0' && value <= '9' || value === '.') {
+        if (value === '(' || value === ')') {
+            this.handleParentheses(value);
+        } else if (value >= '0' && value <= '9' || value === '.') {
             if (this.equalsJustPressed) {
                 this.handleClear();
                 this.equalsJustPressed = false;
@@ -154,22 +168,52 @@ class Calculator {
         inverseButton.classList.add('disabled');
     }
 
-    handleEquals() {
-        if (this.operator && !this.waitingForSecondOperand) {
-            const result = this.calculate();
-            this.currentInput = `${result}`;
-            this.displayString = this.currentInput;
-            this.operator = null;
-            this.firstOperand = null;
-            this.waitingForSecondOperand = true;
-            this.equalsJustPressed = true;
+    // Add this new method
+    handleParentheses(value) {
+        if (value === '(') {
+            if (this.equalsJustPressed) {
+                this.handleClear();
+                this.equalsJustPressed = false;
+            }
             
-            const backspaceButton = document.querySelector('button[data-value="backspace"]');
-            backspaceButton.classList.add('disabled');
+            // Add multiplication operator only if there's a non-zero number before the opening parenthesis
+            if (this.displayString !== '0' && 
+                (!isNaN(this.displayString.slice(-1)) || this.displayString.slice(-1) === ')')) {
+                this.handleOperator('*');
+            } else if (this.displayString === '0') {
+                // Replace the initial zero instead of multiplying
+                this.displayString = '(';
+                this.currentInput = '0';
+                this.parenthesesCount++;
+                this.updateDisplay();
+                return;
+            }
             
-            this.display.classList.add('result');
-            
+            this.parenthesesCount++;
+            this.displayString += '(';
+            this.currentInput = '0';
             this.updateDisplay();
+        } else if (value === ')') {
+            if (this.parenthesesCount > 0 && !this.waitingForSecondOperand) {
+                this.parenthesesCount--;
+                this.displayString += ')';
+                this.updateDisplay();
+            }
+        }
+    }
+
+    // Add this new method
+    evaluateExpression(expression) {
+        // Replace display operators with JavaScript operators
+        expression = expression.replace(/×/g, '*').replace(/÷/g, '/');
+        
+        // Evaluate the expression safely
+        try {
+            // Use Function instead of eval for better security
+            const result = new Function('return ' + expression)();
+            return parseFloat(result.toFixed(8));
+        } catch (error) {
+            throw new Error('Invalid Expression');
         }
     }
 
@@ -179,7 +223,47 @@ class Calculator {
         this.firstOperand = null;
         this.operator = null;
         this.waitingForSecondOperand = false;
+        this.parenthesesCount = 0;  // Add this line
         this.updateDisplay();
+    }
+
+    // Modify handleEquals
+    handleEquals() {
+        if (this.parenthesesCount === 0) {
+            if (this.operator && !this.waitingForSecondOperand) {
+                const result = this.calculate();
+                this.currentInput = `${result}`;
+                this.displayString = this.currentInput;
+                this.operator = null;
+                this.firstOperand = null;
+                this.waitingForSecondOperand = true;
+                this.equalsJustPressed = true;
+                
+                const backspaceButton = document.querySelector('button[data-value="backspace"]');
+                backspaceButton.classList.add('disabled');
+                
+                this.display.classList.add('result');
+                
+                this.updateDisplay();
+            }
+        } else {
+            try {
+                let result = this.evaluateExpression(this.displayString);
+                if (result === Infinity || isNaN(result)) {
+                    this.displayString = 'Error';
+                    this.currentInput = 'Error';
+                } else {
+                    this.currentInput = result.toString();
+                    this.displayString = result.toString();
+                }
+                this.parenthesesCount = 0;
+                this.updateDisplay();
+            } catch (error) {
+                this.displayString = 'Error';
+                this.currentInput = 'Error';
+                this.updateDisplay();
+            }
+        }
     }
 
     handleBackspace() {
