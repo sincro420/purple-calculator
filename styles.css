@@ -152,7 +152,8 @@ button:active {
 
 /* Backspace Button States */
 button[data-value="1/x"].disabled,
-button[data-value="backspace"].disabled {
+button[data-value="backspace"].disabled,
+button[data-value="!"].disabled {
     opacity: 0.44;
     border-color: #666;
     color: #ebe5e5;
@@ -162,7 +163,9 @@ button[data-value="backspace"].disabled {
 button[data-value="1/x"].disabled:active,
 button[data-value="1/x"].disabled.animating,
 button[data-value="backspace"].disabled:active,
-button[data-value="backspace"].disabled.animating {
+button[data-value="backspace"].disabled.animating,
+button[data-value="!"].disabled:active,
+button[data-value="!"].disabled.animating {
     animation: disabledShake 0.5s cubic-bezier(0.4, 0, 0.6, 1) forwards;
     background: var(--dark) !important;
     color: #666 !important;
