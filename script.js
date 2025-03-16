@@ -20,6 +20,28 @@ class Calculator {
                 const value = button.dataset.value;
 
                 if (value === '1/x') {
+                    // Check if the current input can have an inverse applied to it
+                    if (this.currentInput === 'Error') {
+                        return; // Don't apply inverse to an error
+                    }
+                    
+                    // Check if the current value is zero
+                    let currentValue;
+                    if (this.currentInput === 'π') {
+                        currentValue = Math.PI;
+                    } else if (this.currentInput === 'e') {
+                        currentValue = Math.E;
+                    } else {
+                        currentValue = parseFloat(this.currentInput);
+                    }
+                    
+                    if (currentValue === 0) {
+                        this.displayString = 'Error';
+                        this.currentInput = 'Error';
+                        this.display.textContent = this.displayString;
+                        return;
+                    }
+                    
                     if (this.displayString !== '0') {
                         let displayValue = this.displayString;
                         if (this.operator && this.firstOperand !== null && this.waitingForSecondOperand === false) {
@@ -95,6 +117,11 @@ class Calculator {
     }
 
     handleInput(value) {
+        // Clear error state if present
+        if (this.currentInput === 'Error' && value !== '!' && value !== '1/x'){
+            this.handleClear();
+        }
+
         if (value === '(' || value === ')') {
             this.handleParentheses(value);
         } else if (value >= '0' && value <= '9' || value === '.') {
@@ -144,6 +171,20 @@ class Calculator {
     handleFactorial(n) {
         // If called with no arguments, handle the UI interaction
         if (arguments.length === 0) {
+            // Check if the current input can have a factorial applied to it
+            if (this.currentInput === 'Error') {
+                return; // Don't add factorial to an error
+            }
+            
+            // Check if the current input is a valid number or constant
+            const lastChar = this.displayString.slice(-1);
+            if (isNaN(parseInt(lastChar)) && lastChar !== 'π' && lastChar !== 'e' && lastChar !== ')') {
+                this.displayString = 'Error';
+                this.currentInput = 'Error';
+                this.updateDisplay();
+                return;
+            }
+            
             if (this.equalsJustPressed) {
                 // Don't clear when equals was just pressed, just update the display
                 this.equalsJustPressed = false;
@@ -179,6 +220,12 @@ class Calculator {
     }
 
     evaluateExpression(expression) {
+        // Check for invalid factorial operations
+        const invalidFactorialPattern = /[+\-×÷\^]\s*!/;
+        if (invalidFactorialPattern.test(expression) || expression.startsWith('!')) {
+            throw new Error('Invalid factorial operation');
+        }
+        
         // Process factorial operations
         expression = expression.replace(/(\d+)!/g, (match, number) => {
             return this.handleFactorial(parseInt(number));
@@ -196,6 +243,22 @@ class Calculator {
         // Add this new code to handle factorials for expressions with decimal points
         expression = expression.replace(/(\d+\.\d+)!/g, (match, number) => {
             return this.handleFactorial(Math.floor(parseFloat(number)));
+        });
+        
+        // NEW: Handle complex factorial expressions like 6×2!
+        expression = expression.replace(/(\d+)×(\d+)!/g, (match, num1, num2) => {
+            return num1 * this.handleFactorial(parseInt(num2));
+        });
+        
+        // NEW: Handle other complex factorial expressions
+        expression = expression.replace(/\(([^)]+)\)!/g, (match, subExpr) => {
+            try {
+                // Evaluate the sub-expression inside parentheses first
+                const subResult = this.evaluateExpression(subExpr);
+                return this.handleFactorial(Math.floor(subResult));
+            } catch (error) {
+                throw new Error('Invalid factorial expression');
+            }
         });
         
         // Process square root functions
@@ -335,6 +398,10 @@ class Calculator {
                 this.currentInput = '0';
                 this.parenthesesCount++;
                 this.updateDisplay();
+                
+                // Disable factorial button when open parenthesis is pressed
+                const factorialButton = document.querySelector('button[data-value="!"]');
+                factorialButton.classList.add('disabled');
                 return;
             }
             
@@ -342,16 +409,28 @@ class Calculator {
             this.displayString += '(';
             this.currentInput = '0';
             this.updateDisplay();
+            
+            // Disable factorial button when open parenthesis is pressed
+            const factorialButton = document.querySelector('button[data-value="!"]');
+            factorialButton.classList.add('disabled');
         } else if (value === ')') {
             if (this.parenthesesCount > 0 && !this.waitingForSecondOperand) {
                 this.parenthesesCount--;
                 this.displayString += ')';
                 this.updateDisplay();
+                
+                // Enable factorial button when closing parenthesis is pressed
+                const factorialButton = document.querySelector('button[data-value="!"]');
+                factorialButton.classList.remove('disabled');
             } else if (this.displayString.includes('log(') || this.displayString.includes('ln(') || this.displayString.includes('√(')) {
                 // Handle closing parenthesis for logarithm and square root functions
                 if (!this.displayString.endsWith(')')) {
                     this.displayString += ')';
                     this.updateDisplay();
+                    
+                    // Enable factorial button when closing parenthesis is pressed
+                    const factorialButton = document.querySelector('button[data-value="!"]');
+                    factorialButton.classList.remove('disabled');
                 }
             }
         }
@@ -365,10 +444,6 @@ class Calculator {
         this.waitingForSecondOperand = false;
         this.parenthesesCount = 0;
         this.updateDisplay();
-        
-        // Disable factorial button when calculator is cleared
-        const factorialButton = document.querySelector('button[data-value="!"]');
-        factorialButton.classList.add('disabled');
     }
 
     handleEquals() {
@@ -384,23 +459,39 @@ class Calculator {
             try {
                 // Process the factorial expression
                 let result;
-                if (this.currentInput.endsWith('!')) {
+                
+                // NEW: Handle complex expressions with factorial
+                if (this.displayString.includes('×') || 
+                    this.displayString.includes('÷') || 
+                    this.displayString.includes('+') || 
+                    this.displayString.includes('-') || 
+                    this.displayString.includes('^')) {
+                    
+                    // Use evaluateExpression for complex expressions with factorial
+                    result = this.evaluateExpression(this.displayString);
+                } else if (this.currentInput.endsWith('!')) {
                     // Get the number part without the factorial symbol
                     const numberPart = this.currentInput.slice(0, -1);
-                    const value = parseFloat(numberPart);
+                    let value;
                     
-                    // Calculate the factorial - FIXED: using handleFactorial instead of calculateFactorial
+                    // Handle constants
+                    if (numberPart === 'π') {
+                        value = Math.PI;
+                    } else if (numberPart === 'e') {
+                        value = Math.E;
+                    } else {
+                        value = parseFloat(numberPart);
+                    }
+                    
+                    // Calculate the factorial
                     result = this.handleFactorial(Math.floor(value));
-                    
-                    this.currentInput = result.toString();
-                    this.displayString = result.toString();
                 } else {
-                    // Use evaluateExpression for more complex expressions with factorial
+                    // Use evaluateExpression for other expressions with factorial
                     result = this.evaluateExpression(this.displayString);
-                    this.currentInput = result.toString();
-                    this.displayString = result.toString();
                 }
                 
+                this.currentInput = result.toString();
+                this.displayString = result.toString();
                 this.operator = null;
                 this.firstOperand = null;
                 this.waitingForSecondOperand = true;
@@ -413,13 +504,16 @@ class Calculator {
                 const factorialButton = document.querySelector('button[data-value="!"]');
                 factorialButton.classList.remove('disabled');
                 
+                // Enable 1/x button after calculation
+                const inverseButton = document.querySelector('button[data-value="1/x"]');
+                inverseButton.classList.remove('disabled');
+                
                 this.updateDisplay();
                 return;
             } catch (error) {
                 this.displayString = 'Error';
                 this.currentInput = 'Error';
                 this.updateDisplay();
-                return;
             }
         }
         
@@ -454,6 +548,10 @@ class Calculator {
                 const factorialButton = document.querySelector('button[data-value="!"]');
                 factorialButton.classList.remove('disabled');
                 
+                // Enable 1/x button after calculation
+                const inverseButton = document.querySelector('button[data-value="1/x"]');
+                inverseButton.classList.remove('disabled');
+                
                 this.updateDisplay();
             }
         } else {
@@ -481,6 +579,10 @@ class Calculator {
                 // Enable factorial button after calculation
                 const factorialButton = document.querySelector('button[data-value="!"]');
                 factorialButton.classList.remove('disabled');
+                
+                // Enable 1/x button after calculation
+                const inverseButton = document.querySelector('button[data-value="1/x"]');
+                inverseButton.classList.remove('disabled');
                 
                 this.updateDisplay();
             } catch (error) {
@@ -564,9 +666,9 @@ class Calculator {
         if (this.currentInput === '0' && this.displayString === '0') {
             this.displayString = type + '(';
         } else {
-            // Check if the last character is a digit or closing parenthesis
+            // Check if the last character is a digit, closing parenthesis, constant, or factorial
             const lastChar = this.displayString.slice(-1);
-            if (!isNaN(parseInt(lastChar)) || lastChar === ')' || lastChar === 'π' || lastChar === 'e') {
+            if (!isNaN(parseInt(lastChar)) || lastChar === ')' || lastChar === 'π' || lastChar === 'e' || lastChar === '!') {
                 // Implicit multiplication - add multiplication operator
                 this.displayString += '×' + type + '(';
             } else {
@@ -578,6 +680,10 @@ class Calculator {
         this.currentInput = '0'; // Reset current input for what comes inside the log
         this.waitingForSecondOperand = false;
         this.updateDisplay();
+        
+        // Disable factorial button when logarithm is pressed
+        const factorialButton = document.querySelector('button[data-value="!"]');
+        factorialButton.classList.add('disabled');
     }
 
     handleSquareRoot() {
@@ -731,10 +837,6 @@ class Calculator {
 
 document.addEventListener('DOMContentLoaded', () => {
     new Calculator();
-    
-    // Initialize factorial button as disabled
-    document.querySelector('button[data-value="!"]').classList.add('disabled');
-    
     document.querySelector('.expand').addEventListener('click', function() {
         const calculator = document.querySelector('.calculator');
         const buttonsGrid = document.querySelector('.buttons');
