@@ -1,4 +1,5 @@
 class Calculator {
+    // Initialize calculator state and UI elements
     constructor() {
         this.display = document.querySelector('.display');
         this.buttons = document.querySelectorAll('button');
@@ -8,7 +9,7 @@ class Calculator {
         this.operator = null;
         this.waitingForSecondOperand = false;
         this.equalsJustPressed = false;
-        this.parenthesesCount = 0;  // Add this line
+        this.parenthesesCount = 0;
         this.initialize();
     }
 
@@ -19,13 +20,12 @@ class Calculator {
                 
                 const value = button.dataset.value;
 
+                // Handle inverse (1/x) operation
                 if (value === '1/x') {
-                    // Check if the current input can have an inverse applied to it
                     if (this.currentInput === 'Error') {
-                        return; // Don't apply inverse to an error
+                        return;
                     }
                     
-                    // Check if the current value is zero
                     let currentValue;
                     if (this.currentInput === 'π') {
                         currentValue = Math.PI;
@@ -45,10 +45,8 @@ class Calculator {
                     if (this.displayString !== '0') {
                         let displayValue = this.displayString;
                         if (this.operator && this.firstOperand !== null && this.waitingForSecondOperand === false) {
-                            // Equation present, inverse only the last number (currentInput)
                             let currentValue;
                             
-                            // Handle π and e constants
                             if (this.currentInput === 'π') {
                                 currentValue = Math.PI;
                             } else if (this.currentInput === 'e') {
@@ -59,7 +57,6 @@ class Calculator {
                             
                             if (currentValue !== 0) {
                                 let inverseValue = 1 / currentValue;
-                                // Use scientific notation if the number is very small
                                 if (Math.abs(inverseValue) < 0.000001) {
                                     inverseValue = inverseValue.toExponential(8);
                                 } else {
@@ -74,10 +71,8 @@ class Calculator {
                                 this.currentInput = 'Error';
                             }
                         } else {
-                            // No equation, inverse the whole display
                             let valueToInvert;
                             
-                            // Handle π and e constants
                             if (displayValue === 'π') {
                                 valueToInvert = Math.PI;
                             } else if (displayValue === 'e') {
@@ -115,9 +110,8 @@ class Calculator {
             });
         });
     }
-
+    // Main input handler that routes different calculator inputs to appropriate handlers
     handleInput(value) {
-        // Clear error state if present
         if (this.currentInput === 'Error' && value !== '!' && value !== '1/x'){
             this.handleClear();
         }
@@ -133,7 +127,6 @@ class Calculator {
             }
             this.handleNumber(value);
         } else if (['+', '-', '*', '/', '%', '**'].includes(value)) {
-            // Changed '^' to '**' to match the button's data-value
             this.equalsJustPressed = false;
             document.querySelector('button[data-value="backspace"]').classList.remove('disabled');
             this.display.classList.remove('result');
@@ -166,17 +159,13 @@ class Calculator {
         }
     }
 
-    // Add this new method for factorial
-    // Combined method for handling factorial UI and calculation
+    // Handles factorial operations for both UI updates and actual calculations
     handleFactorial(n) {
-        // If called with no arguments, handle the UI interaction
         if (arguments.length === 0) {
-            // Check if the current input can have a factorial applied to it
             if (this.currentInput === 'Error') {
-                return; // Don't add factorial to an error
+                return;
             }
             
-            // Check if the current input is a valid number or constant
             const lastChar = this.displayString.slice(-1);
             if (isNaN(parseInt(lastChar)) && lastChar !== 'π' && lastChar !== 'e' && lastChar !== ')') {
                 this.displayString = 'Error';
@@ -186,30 +175,25 @@ class Calculator {
             }
             
             if (this.equalsJustPressed) {
-                // Don't clear when equals was just pressed, just update the display
                 this.equalsJustPressed = false;
                 document.querySelector('button[data-value="backspace"]').classList.remove('disabled');
                 this.display.classList.remove('result');
-                // Add factorial to the current result
                 this.displayString += '!';
                 this.currentInput += '!';
             } else {
-                // Add factorial symbol to display
                 this.displayString += '!';
                 this.currentInput += '!';
             }
             
             this.updateDisplay();
             
-            // Disable the factorial button after use until a new number is entered
             const factorialButton = document.querySelector('button[data-value="!"]');
             factorialButton.classList.add('disabled');
             return;
         }
         
-        // Rest of the factorial calculation logic remains the same
         if (n < 0) throw new Error('Cannot calculate factorial of negative numbers');
-        if (n > 170) return Infinity; // JavaScript can't handle larger factorials
+        if (n > 170) return Infinity;
         if (n === 0 || n === 1) return 1;
         
         let result = 1;
@@ -219,41 +203,48 @@ class Calculator {
         return result;
     }
 
+    // Evaluates complex mathematical expressions with support for special functions
     evaluateExpression(expression) {
-        // Check for invalid factorial operations
+        // Check for invalid factorial patterns
         const invalidFactorialPattern = /[+\-×÷\^]\s*!/;
         if (invalidFactorialPattern.test(expression) || expression.startsWith('!')) {
             throw new Error('Invalid factorial operation');
         }
         
-        // Process factorial operations
+        // Validate factorial prefix
+        const invalidFactorialPrefixPattern = /([^0-9)])\!/g;
+        if (invalidFactorialPrefixPattern.test(expression)) {
+            throw new Error('Invalid factorial operation');
+        }
+        
+        // Handle factorial for regular numbers
         expression = expression.replace(/(\d+)!/g, (match, number) => {
             return this.handleFactorial(parseInt(number));
         });
         
-        // Handle factorial for constants
+        // Handle factorial for π
         expression = expression.replace(/π!/g, () => {
             return this.handleFactorial(Math.floor(Math.PI));
         });
         
+        // Handle factorial for e
         expression = expression.replace(/e!/g, () => {
             return this.handleFactorial(Math.floor(Math.E));
         });
         
-        // Add this new code to handle factorials for expressions with decimal points
+        // Handle factorial for decimal numbers
         expression = expression.replace(/(\d+\.\d+)!/g, (match, number) => {
             return this.handleFactorial(Math.floor(parseFloat(number)));
         });
         
-        // NEW: Handle complex factorial expressions like 6×2!
+        // Handle factorial with multiplication
         expression = expression.replace(/(\d+)×(\d+)!/g, (match, num1, num2) => {
             return num1 * this.handleFactorial(parseInt(num2));
         });
         
-        // NEW: Handle other complex factorial expressions
+        // Handle factorial for parenthesized expressions
         expression = expression.replace(/\(([^)]+)\)!/g, (match, subExpr) => {
             try {
-                // Evaluate the sub-expression inside parentheses first
                 const subResult = this.evaluateExpression(subExpr);
                 return this.handleFactorial(Math.floor(subResult));
             } catch (error) {
@@ -261,27 +252,28 @@ class Calculator {
             }
         });
         
-        // Process square root functions
+        // Handle square root operations
         expression = expression.replace(/√\(([^)]+)\)/g, (match, number) => {
             const value = parseFloat(number);
             if (value < 0) throw new Error('Invalid square root input');
             return Math.sqrt(value);
         });
         
-        // Process logarithm functions
+        // Handle base-10 logarithm
         expression = expression.replace(/log\(([^)]+)\)/g, (match, number) => {
             const value = parseFloat(number);
             if (value <= 0) throw new Error('Invalid logarithm input');
             return Math.log10(value);
         });
         
+        // Handle natural logarithm
         expression = expression.replace(/ln\(([^)]+)\)/g, (match, number) => {
             const value = parseFloat(number);
             if (value <= 0) throw new Error('Invalid logarithm input');
             return Math.log(value);
         });
         
-        // Replace display operators and constants with JavaScript operators
+        // Replace mathematical symbols with JavaScript operators
         expression = expression
             .replace(/×/g, '*')
             .replace(/÷/g, '/')
@@ -289,6 +281,7 @@ class Calculator {
             .replace(/π/g, 'Math.PI')
             .replace(/e(?![0-9a-z(])/g, 'Math.E');
         
+        // Evaluate the final expression
         try {
             const result = new Function('Math', 'return ' + expression)(Math);
             return parseFloat(result.toFixed(8));
@@ -296,7 +289,8 @@ class Calculator {
             throw new Error('Invalid Expression');
         }
     }
-
+    
+    // Handles numeric input including decimal points
     handleNumber(number) {
         if (this.waitingForSecondOperand) {
             if (this.operator === null) {
@@ -308,12 +302,10 @@ class Calculator {
             }
             this.waitingForSecondOperand = false;
         } else {
-            // Check if we're inside a function like sqrt, log, ln
             const isInsideFunction = this.displayString.endsWith('(');
             
             if (this.currentInput === '0' && number !== '.') {
                 this.currentInput = number;
-                // Only replace the display if we're not inside a function
                 if (!isInsideFunction) {
                     this.displayString = number;
                 } else {
@@ -322,7 +314,6 @@ class Calculator {
             } else {
                 if (number === '.' && this.currentInput.includes('.')) return;
                 this.currentInput += number;
-                // Only replace the display if we're not inside a function and at the start
                 if (this.displayString === '0' && !isInsideFunction) {
                     this.displayString = number;
                 } else {
@@ -332,25 +323,22 @@ class Calculator {
         }
         this.updateDisplay();
 
-        // Enable 1/x button when number is pressed
         const inverseButton = document.querySelector('button[data-value="1/x"]');
         inverseButton.classList.remove('disabled');
         
-        // Enable factorial button when number is pressed
         const factorialButton = document.querySelector('button[data-value="!"]');
         factorialButton.classList.remove('disabled');
     }
 
+    // Processes mathematical operators (+, -, *, /, **, %)
     handleOperator(operator) {
         const inputValue = parseFloat(this.currentInput);
         
         if (this.firstOperand === null) {
             this.firstOperand = inputValue;
         } else if (this.operator && !this.waitingForSecondOperand) {
-            // Only calculate if we have a second operand
             const result = this.calculate();
             this.firstOperand = result;
-            // Don't update currentInput or displayString here
         }
         
         const displayOperator = operator === '*' ? '×' : 
@@ -358,7 +346,6 @@ class Calculator {
                               operator === '**' ? '^' :
                               operator;
         
-        // Replace operator if last character is already an operator
         const lastChar = this.displayString.slice(-1);
         const operators = ['×', '÷', '+', '-', '%', '^'];
         if (operators.includes(lastChar)) {
@@ -371,16 +358,14 @@ class Calculator {
         this.waitingForSecondOperand = true;
         this.updateDisplay();
     
-        // Disable 1/x button when operator is pressed
         const inverseButton = document.querySelector('button[data-value="1/x"]');
         inverseButton.classList.add('disabled');
         
-        // Disable factorial button when operator is pressed
         const factorialButton = document.querySelector('button[data-value="!"]');
         factorialButton.classList.add('disabled');
     }
 
-    // Add this new method
+    // Manages opening and closing parentheses for grouping expressions
     handleParentheses(value) {
         if (value === '(') {
             if (this.equalsJustPressed) {
@@ -388,18 +373,15 @@ class Calculator {
                 this.equalsJustPressed = false;
             }
             
-            // Add multiplication operator only if there's a non-zero number before the opening parenthesis
             if (this.displayString !== '0' && 
                 (!isNaN(this.displayString.slice(-1)) || this.displayString.slice(-1) === ')')) {
                 this.handleOperator('*');
             } else if (this.displayString === '0') {
-                // Replace the initial zero instead of multiplying
                 this.displayString = '(';
                 this.currentInput = '0';
                 this.parenthesesCount++;
                 this.updateDisplay();
                 
-                // Disable factorial button when open parenthesis is pressed
                 const factorialButton = document.querySelector('button[data-value="!"]');
                 factorialButton.classList.add('disabled');
                 return;
@@ -410,7 +392,6 @@ class Calculator {
             this.currentInput = '0';
             this.updateDisplay();
             
-            // Disable factorial button when open parenthesis is pressed
             const factorialButton = document.querySelector('button[data-value="!"]');
             factorialButton.classList.add('disabled');
         } else if (value === ')') {
@@ -419,16 +400,13 @@ class Calculator {
                 this.displayString += ')';
                 this.updateDisplay();
                 
-                // Enable factorial button when closing parenthesis is pressed
                 const factorialButton = document.querySelector('button[data-value="!"]');
                 factorialButton.classList.remove('disabled');
             } else if (this.displayString.includes('log(') || this.displayString.includes('ln(') || this.displayString.includes('√(')) {
-                // Handle closing parenthesis for logarithm and square root functions
                 if (!this.displayString.endsWith(')')) {
                     this.displayString += ')';
                     this.updateDisplay();
                     
-                    // Enable factorial button when closing parenthesis is pressed
                     const factorialButton = document.querySelector('button[data-value="!"]');
                     factorialButton.classList.remove('disabled');
                 }
@@ -436,6 +414,7 @@ class Calculator {
         }
     }
     
+    // Resets calculator to initial state
     handleClear() {
         this.currentInput = '0';
         this.displayString = '0';
@@ -446,35 +425,29 @@ class Calculator {
         this.updateDisplay();
     }
 
+    // Evaluates the current expression and displays result
     handleEquals() {
-        // Check if we have any special functions in the expression
         const hasSpecialFunction = this.displayString.includes('√(') || 
                                   this.displayString.includes('log(') || 
                                   this.displayString.includes('ln(');
         
-        // Check if we have a factorial in the expression
         const hasFactorial = this.displayString.includes('!');
         
         if (hasFactorial) {
             try {
-                // Process the factorial expression
                 let result;
                 
-                // NEW: Handle complex expressions with factorial
                 if (this.displayString.includes('×') || 
                     this.displayString.includes('÷') || 
                     this.displayString.includes('+') || 
                     this.displayString.includes('-') || 
                     this.displayString.includes('^')) {
                     
-                    // Use evaluateExpression for complex expressions with factorial
                     result = this.evaluateExpression(this.displayString);
                 } else if (this.currentInput.endsWith('!')) {
-                    // Get the number part without the factorial symbol
                     const numberPart = this.currentInput.slice(0, -1);
                     let value;
                     
-                    // Handle constants
                     if (numberPart === 'π') {
                         value = Math.PI;
                     } else if (numberPart === 'e') {
@@ -483,10 +456,8 @@ class Calculator {
                         value = parseFloat(numberPart);
                     }
                     
-                    // Calculate the factorial
                     result = this.handleFactorial(Math.floor(value));
                 } else {
-                    // Use evaluateExpression for other expressions with factorial
                     result = this.evaluateExpression(this.displayString);
                 }
                 
@@ -499,15 +470,10 @@ class Calculator {
                 
                 document.querySelector('button[data-value="backspace"]').classList.add('disabled');
                 this.display.classList.add('result');
-                
-                // Enable factorial button after calculation
                 const factorialButton = document.querySelector('button[data-value="!"]');
                 factorialButton.classList.remove('disabled');
-                
-                // Enable 1/x button after calculation
                 const inverseButton = document.querySelector('button[data-value="1/x"]');
                 inverseButton.classList.remove('disabled');
-                
                 this.updateDisplay();
                 return;
             } catch (error) {
@@ -517,12 +483,10 @@ class Calculator {
             }
         }
         
-        // Rest of the existing handleEquals method
         if (this.parenthesesCount === 0 && !this.displayString.includes('×') && 
             !this.displayString.includes('÷') && !this.displayString.includes('+') && 
             !this.displayString.includes('-') && !this.displayString.includes('^') && 
             !hasSpecialFunction) {
-            // If the current input contains π or e, we need to evaluate it
             if (this.currentInput === 'π' || this.currentInput === 'e') {
                 const value = this.currentInput === 'π' ? Math.PI : Math.E;
                 this.currentInput = value.toString();
@@ -538,25 +502,17 @@ class Calculator {
                 this.firstOperand = null;
                 this.waitingForSecondOperand = true;
                 this.equalsJustPressed = true;
-                
                 const backspaceButton = document.querySelector('button[data-value="backspace"]');
                 backspaceButton.classList.add('disabled');
-                
                 this.display.classList.add('result');
-                
-                // Enable factorial button after calculation
                 const factorialButton = document.querySelector('button[data-value="!"]');
                 factorialButton.classList.remove('disabled');
-                
-                // Enable 1/x button after calculation
                 const inverseButton = document.querySelector('button[data-value="1/x"]');
                 inverseButton.classList.remove('disabled');
-                
                 this.updateDisplay();
             }
         } else {
             try {
-                // Always use evaluateExpression for complex expressions to ensure BODMAS rules
                 let result = this.evaluateExpression(this.displayString);
                 if (result === Infinity || isNaN(result)) {
                     this.displayString = 'Error';
@@ -570,20 +526,13 @@ class Calculator {
                 this.firstOperand = null;
                 this.waitingForSecondOperand = true;
                 this.equalsJustPressed = true;
-                
                 const backspaceButton = document.querySelector('button[data-value="backspace"]');
                 backspaceButton.classList.add('disabled');
-                
                 this.display.classList.add('result');
-                
-                // Enable factorial button after calculation
                 const factorialButton = document.querySelector('button[data-value="!"]');
                 factorialButton.classList.remove('disabled');
-                
-                // Enable 1/x button after calculation
                 const inverseButton = document.querySelector('button[data-value="1/x"]');
                 inverseButton.classList.remove('disabled');
-                
                 this.updateDisplay();
             } catch (error) {
                 this.displayString = 'Error';
@@ -593,9 +542,9 @@ class Calculator {
         }
     }
 
+    // Handles deletion of the last entered character
     handleBackspace() {
         if (this.waitingForSecondOperand) {
-            // If last character was an operator, remove it and reset operator state
             this.displayString = this.displayString.slice(0, -1);
             this.operator = null;
             this.waitingForSecondOperand = false;
@@ -613,7 +562,6 @@ class Calculator {
         }
         this.updateDisplay();
 
-        // New check for operator at the end after backspace
         const lastChar = this.displayString.slice(-1);
         const operatorMap = {'×': '*', '÷': '/', '+': '+', '-': '-', '%': '%'};
         if (Object.keys(operatorMap).includes(lastChar)) {
@@ -622,7 +570,7 @@ class Calculator {
             this.currentInput = this.firstOperand.toString();
         }
     }
-
+    // Handles percentage calculations
     handlePercentage() {
         if (this.currentInput === '0' || this.waitingForSecondOperand) return;
         
@@ -630,10 +578,8 @@ class Calculator {
         let result;
         
         if (this.operator && this.firstOperand !== null) {
-            // Calculate percentage of the first operand
             result = (this.firstOperand * currentValue) / 100;
         } else {
-            // Simple percentage calculation
             result = currentValue / 100;
         }
         
@@ -641,7 +587,6 @@ class Calculator {
         this.displayString = `${result}`;
         
         if (this.operator) {
-            // If we're in the middle of an operation, show the full expression
             const displayOperator = this.operator === '*' ? '×' : 
                                   this.operator === '/' ? '÷' : 
                                   this.operator;
@@ -651,9 +596,7 @@ class Calculator {
         this.updateDisplay();
     }
 
- 
-
-    // Add the missing handleLogarithm method
+    // Handles logarithm operations (log, ln)
     handleLogarithm(type) {
         if (this.equalsJustPressed) {
             this.handleClear();
@@ -662,30 +605,27 @@ class Calculator {
             this.display.classList.remove('result');
         }
         
-        // Add logarithm symbol to display
         if (this.currentInput === '0' && this.displayString === '0') {
             this.displayString = type + '(';
         } else {
-            // Check if the last character is a digit, closing parenthesis, constant, or factorial
             const lastChar = this.displayString.slice(-1);
             if (!isNaN(parseInt(lastChar)) || lastChar === ')' || lastChar === 'π' || lastChar === 'e' || lastChar === '!') {
-                // Implicit multiplication - add multiplication operator
                 this.displayString += '×' + type + '(';
             } else {
                 this.displayString += type + '(';
             }
         }
         
-        this.parenthesesCount++; // Increment parentheses count for the opening parenthesis
-        this.currentInput = '0'; // Reset current input for what comes inside the log
+        this.parenthesesCount++;
+        this.currentInput = '0';
         this.waitingForSecondOperand = false;
         this.updateDisplay();
         
-        // Disable factorial button when logarithm is pressed
         const factorialButton = document.querySelector('button[data-value="!"]');
         factorialButton.classList.add('disabled');
     }
 
+    // Processes square root operations
     handleSquareRoot() {
         if (this.equalsJustPressed) {
             this.handleClear();
@@ -694,31 +634,27 @@ class Calculator {
             this.display.classList.remove('result');
         }
         
-        // Add square root symbol to display instead of calculating immediately
         if (this.currentInput === '0' && this.displayString === '0') {
             this.displayString = '√(';
         } else {
-            // If there's already a value, treat it as multiplication: number × √(...)
-            // Check if the last character is a digit or closing parenthesis
             const lastChar = this.displayString.slice(-1);
             if (!isNaN(parseInt(lastChar)) || lastChar === ')' || lastChar === 'π' || lastChar === 'e') {
-                // Implicit multiplication - add multiplication operator
                 this.displayString += '×√(';
             } else {
                 this.displayString += '√(';
             }
         }
         
-        this.parenthesesCount++; // Increment parentheses count for the opening parenthesis
-        this.currentInput = '0'; // Reset current input for what comes inside the sqrt
+        this.parenthesesCount++;
+        this.currentInput = '0';
         this.waitingForSecondOperand = false;
         this.updateDisplay();
         
-        // Disable factorial button when square root is pressed
         const factorialButton = document.querySelector('button[data-value="!"]');
         factorialButton.classList.add('disabled');
     }
 
+    // Handles trigonometric calculations (sin, cos, tan)
     handleTrigonometry(type) {
         if (this.equalsJustPressed) {
             this.handleClear();
@@ -730,7 +666,6 @@ class Calculator {
         const value = parseFloat(this.currentInput);
         let result;
         
-        // Convert to radians if needed
         const radians = value * (Math.PI / 180);
         
         if (type === 'sin') {
@@ -755,6 +690,7 @@ class Calculator {
         this.updateDisplay();
     }
 
+    // Manages mathematical constants (π, e)
     handleConstant(type) {
         if (this.equalsJustPressed) {
             this.handleClear();
@@ -770,7 +706,6 @@ class Calculator {
             symbol = 'e';
         }
         
-        // If we're at the start or after an operator, replace the current input
         if (this.currentInput === '0' || this.waitingForSecondOperand) {
             this.currentInput = symbol;
             if (this.waitingForSecondOperand) {
@@ -780,7 +715,6 @@ class Calculator {
                 this.displayString = symbol;
             }
         } else {
-            // Otherwise, treat as multiplication (e.g., 5π means 5*π)
             this.handleOperator('*');
             this.currentInput = symbol;
             this.displayString += symbol;
@@ -789,17 +723,15 @@ class Calculator {
         
         this.updateDisplay();
         
-        // Enable 1/x button when a constant is pressed, just like with numbers
         const inverseButton = document.querySelector('button[data-value="1/x"]');
         inverseButton.classList.remove('disabled');
         
-        // Enable factorial button when a constant is pressed
         const factorialButton = document.querySelector('button[data-value="!"]');
         factorialButton.classList.remove('disabled');
     }
 
+    // Performs basic arithmetic calculations
     calculate() {
-        // Convert π and e to their actual values if they appear in currentInput
         let secondOperandStr = this.currentInput;
         if (secondOperandStr === 'π') {
             secondOperandStr = Math.PI.toString();
@@ -825,6 +757,7 @@ class Calculator {
         }
     }
 
+    // Updates calculator display and adjusts font size
     updateDisplay() {
         if (this.displayString.length > 10) {
             this.display.style.fontSize = '1.5rem';
@@ -835,6 +768,7 @@ class Calculator {
     }
 }
 
+// Initialize calculator and setup event listeners
 document.addEventListener('DOMContentLoaded', () => {
     new Calculator();
     document.querySelector('.expand').addEventListener('click', function() {
@@ -849,13 +783,11 @@ document.addEventListener('DOMContentLoaded', () => {
             scientificButtons.forEach(button => button.classList.remove('hidden'));
             this.setAttribute('data-expanded', 'true');
             
-            // Add popup notification
             const popup = document.createElement('div');
             popup.className = 'popup';
             popup.textContent = 'You are now in Expanded Mode';
             document.body.appendChild(popup);
             
-            // Remove popup after 3 seconds
             setTimeout(() => {
                 popup.classList.add('fade-out');
                 setTimeout(() => popup.remove(), 500);
